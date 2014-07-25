@@ -5,6 +5,6 @@ var dotenv = require('dotenv');
 dotenv.load();
 
 module.exports = {
-  port: process.env.PORT || 3000,
+  port: process.env.QUEUE_PORT || process.env.PORT || 3000,
   redisUrl: process.env.REDIS_URL || "redis://localhost"
 };
