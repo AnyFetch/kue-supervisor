@@ -2,7 +2,7 @@
 
 var express = require('express');
 var bodyParser = require('body-parser');
-var request = require('superagent');
+var http = require('http');
 var cluster = require('cluster');
 var redis = require('redis');
 var url = require('url');
@@ -52,12 +52,15 @@ client.keys("*:ids", function (err, keys) {
       QUEUE_PORT: confQueue.port
     });
 
-    app.use('/' + confQueue.name, function(req, res) {
-      if(req.url === "/") {
-        req.url = "/active";
+    app.use('/' + confQueue.name, function(reqClient, resClient) {
+      if(reqClient.url === "/") {
+        reqClient.url = "/active";
       }
 
-      req.pipe(request("http://localhost:" + confQueue.port + req.url)).pipe(res);
+      http.get("http://localhost:" + confQueue.port + reqClient.url, function(resContent) {
+        resClient.set(resContent.headers);
+        resContent.pipe(resClient);
+      });
     });
   });
 });
