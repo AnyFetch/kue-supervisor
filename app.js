@@ -25,7 +25,7 @@ client.on('error', function(err) {
 
 var confQueues = [];
 
-client.keys("*:ids", function (err, keys) {
+client.keys("*:ids", function(err, keys) {
   if(err) {
     return console.warn('ERROR:', err);
   }
@@ -36,6 +36,10 @@ client.keys("*:ids", function (err, keys) {
     key = key.replace(':ids', '');
 
     var matches = key.match(/^https?:\/\/([a-zA-Z0-9]+)/);
+
+    if(!matches) {
+      return;
+    }
 
     confQueues.push({
       name: matches[1],
