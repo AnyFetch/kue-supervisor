@@ -7,7 +7,7 @@ Supervising multiples Redis queues in [kue](https://github.com/learnboost/kue)
 Install `redis-server`.
 Clone the repo, then `npm install`.
 
-#How it works ?
+# How it works ?
 Starting `bin/server` will retrieve all Kue queues in redis server automatically.
 
 Navigate to `http://localhost:port/queue_prefix/` to retrieve details and tasks about this specific queue, or go to `/` for a list of queues on the server.
