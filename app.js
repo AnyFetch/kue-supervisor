@@ -23,12 +23,13 @@ client.on('error', function(err) {
   console.warn('ERROR:', err);
 });
 
+var confQueues = [];
+
 client.keys("*:ids", function (err, keys) {
   if(err) {
     return console.warn('ERROR:', err);
   }
 
-  var confQueues = [];
   var port = config.port + 1;
 
   keys.forEach(function(key) {
@@ -63,6 +64,14 @@ client.keys("*:ids", function (err, keys) {
       });
     });
   });
+});
+
+app.engine('jade', require('jade').__express);
+app.set('views', __dirname + "/views");
+app.set('view engine', 'jade');
+
+app.get('/', function(req, res) {
+  res.render('index', {queues: confQueues});
 });
 
 module.exports = app;

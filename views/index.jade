@@ -1,0 +1,11 @@
+doctype html
+block vars
+html(lang='en')
+  head
+    title Kue Supervisor
+    block head
+  body
+    - for(var i = 0; i < queues.length; ++i) {
+        li
+          a(href=queues[i].name + '/active')= queues[i].name
+    - }
