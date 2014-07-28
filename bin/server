@@ -12,7 +12,8 @@ if(cluster.isMaster) {
   master.listen(config.port, function() {
     console.log("Server listening on port " + config.port);
   });
-} else {
+}
+else {
   var slave = require('../lib/slave.js');
 
   slave.listen(config.port, function() {
