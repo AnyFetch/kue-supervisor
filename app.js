@@ -36,7 +36,7 @@ client.keys("*:ids", function(err, keys) {
     return console.warn('ERROR:', err);
   }
 
-  var port = parseInt(config.port) + 1;
+  var port = (config.slavePort) ? parseInt(config.slavePort) : parseInt(config.port) + 1;
 
   keys.forEach(function(key) {
     key = key.replace(':ids', '');

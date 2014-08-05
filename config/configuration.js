@@ -6,6 +6,7 @@ dotenv.load();
 
 module.exports = {
   port: process.env.QUEUE_PORT || process.env.PORT || 3000,
+  slavePort: process.env.SLAVE_PORT,
   redisUrl: process.env.REDIS_URL || "redis://localhost",
 
   username: process.env.USER,
