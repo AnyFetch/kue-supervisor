@@ -2,6 +2,7 @@
 
 var express = require('express');
 var bodyParser = require('body-parser');
+var basicAuth = require('basic-auth-connect');
 var http = require('http');
 var cluster = require('cluster');
 var redis = require('redis');
@@ -11,7 +12,12 @@ var url = require('url');
 var config = require('./config/configuration.js');
 
 var app = express();
+
 app.use(bodyParser());
+
+if(config.username && config.password) {
+  app.use(basicAuth(config.username, config.password));
+}
 
 var components = url.parse(config.redisUrl);
 
@@ -30,7 +36,7 @@ client.keys("*:ids", function(err, keys) {
     return console.warn('ERROR:', err);
   }
 
-  var port = config.port + 1;
+  var port = parseInt(config.port) + 1;
 
   keys.forEach(function(key) {
     key = key.replace(':ids', '');
