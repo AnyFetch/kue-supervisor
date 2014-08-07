@@ -81,6 +81,8 @@ function refresh(cb) {
             resContent.pipe(resClient);
           });
         });
+
+        confQueue.launched = true;
       }
     });
 
