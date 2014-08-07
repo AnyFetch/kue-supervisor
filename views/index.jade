@@ -5,6 +5,9 @@ html(lang='en')
     title Kue Supervisor
     block head
   body
+    h1
+      Kue Supervisor
+    a(href="/refresh") Refresh queues
     - for(var i = 0; i < queues.length; ++i) {
         li
           a(href=queues[i].name + '/active')= queues[i].name
