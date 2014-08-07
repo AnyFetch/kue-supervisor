@@ -29,51 +29,69 @@ client.on('error', function(err) {
   console.warn('ERROR:', err);
 });
 
+var prefixesQueues = [];
 var confQueues = [];
 
-client.keys("*:ids", function(err, keys) {
-  if(err) {
-    return console.warn('ERROR:', err);
-  }
-
-  var port = (config.slavePort) ? parseInt(config.slavePort) : parseInt(config.port) + 1;
-
-  keys.forEach(function(key) {
-    key = key.replace(':ids', '');
-
-    var matches = key.match(/^https?:\/\/([a-zA-Z0-9]+)/);
-
-    if(!matches) {
-      return;
+function refresh(cb) {
+  client.keys("*:ids", function(err, keys) {
+    if(err) {
+      return cb(err);
     }
 
-    confQueues.push({
-      name: matches[1],
-      prefix: key,
-      port: port
-    });
+    var port = (confQueues.length === 0) ? ((config.slavePort) ? parseInt(config.slavePort) : parseInt(config.port) + 1) : confQueues[confQueues.length - 1].port + 1;
 
-    port += 1;
-  });
+    keys.forEach(function(key) {
+      key = key.replace(':ids', '');
 
-  confQueues.forEach(function(confQueue) {
-    cluster.fork({
-      QUEUE_PREFIX: confQueue.prefix,
-      QUEUE_NAME: confQueue.name,
-      QUEUE_PORT: confQueue.port
-    });
+      var matches = key.match(/^https?:\/\/([a-zA-Z0-9]+)/);
 
-    app.use('/' + confQueue.name, function(reqClient, resClient) {
-      if(reqClient.url === "/") {
-        reqClient.url = "/active";
+      if(!matches) {
+        return;
       }
 
-      http.get("http://localhost:" + confQueue.port + reqClient.url, function(resContent) {
-        resClient.set(resContent.headers);
-        resContent.pipe(resClient);
-      });
+      if(prefixesQueues.indexOf(key) === -1) {
+        confQueues.push({
+          name: matches[1],
+          prefix: key,
+          port: port,
+          launched: false
+        });
+
+        prefixesQueues.push(key);
+
+        port += 1;
+      }
     });
+
+    confQueues.forEach(function(confQueue) {
+      if(!confQueue.launched) {
+        cluster.fork({
+          QUEUE_PREFIX: confQueue.prefix,
+          QUEUE_NAME: confQueue.name,
+          QUEUE_PORT: confQueue.port
+        });
+
+        app.use('/' + confQueue.name, function(reqClient, resClient) {
+          if(reqClient.url === "/") {
+            reqClient.url = "/active";
+          }
+
+          http.get("http://localhost:" + confQueue.port + reqClient.url, function(resContent) {
+            resClient.set(resContent.headers);
+            resContent.pipe(resClient);
+          });
+        });
+      }
+    });
+
+    cb(null);
   });
+}
+
+refresh(function(err) {
+  if(err) {
+    console.warn('ERROR:', err);
+  }
 });
 
 app.engine('jade', require('jade').__express);
@@ -82,6 +100,17 @@ app.set('view engine', 'jade');
 
 app.get('/', function(req, res) {
   res.render('index', {queues: confQueues});
+});
+
+app.get('/refresh', function(req, res) {
+  refresh(function(err) {
+    if(err) {
+      console.warn('ERROR:', err);
+      return res.send(500);
+    }
+
+    res.redirect('/');
+  });
 });
 
 module.exports = app;
