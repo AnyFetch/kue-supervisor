@@ -19,6 +19,12 @@ if(config.username && config.password) {
   app.use(basicAuth(config.username, config.password));
 }
 
+process.on('exit', function() {
+  for (var id in cluster.workers) {
+    cluster.workers[id].kill();
+  }
+});
+
 var components = url.parse(config.redisUrl);
 
 var client = redis.createClient(components.port || 6379, components.hostname || "localhost", {
