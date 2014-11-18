@@ -1,5 +1,6 @@
 # Kue supervisor
-> Visit http://anyfetch.com for details about AnyFetch.
+
+> **This repo is deprecated**. Kue was too buggy under heavy loads, keeping hundreds of tasks as "current". We've now migrated to [YAQS](https://github.com/AnyFetch/yaqs/) for our queue management.
 
 Supervising multiples Redis queues in [kue](https://github.com/learnboost/kue)
 
